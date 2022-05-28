@@ -3,13 +3,13 @@
 pragma solidity ^0.8.7;
 
 import "./Endeavour.sol";
+import "./EndeavourController.sol";
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract EndeavourDeployer is ERC721URIStorage, Ownable {
+contract EndeavourDeployer is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -18,6 +18,10 @@ contract EndeavourDeployer is ERC721URIStorage, Ownable {
         GREATEST
     }
 
+    address owner;
+    address[] creators;
+    address controller;
+
     Endeavour[] private _endeavours;
 
     uint256 public deployCost = 0.1 ether;
@@ -25,14 +29,31 @@ contract EndeavourDeployer is ERC721URIStorage, Ownable {
 
     mapping(address => mapping(NFTTypes => uint256[])) nftIds;
 
-    constructor(address _newOwner) ERC721("Endevr", "ENDV") {}
+    constructor(address _owner) ERC721("Endevr", "ENDV") {
+        //Setup access role
+        owner = _owner;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    function setEndeavourController(address _controller) public onlyOwner {
+        controller = _controller;
+    }
 
     function createEndeavour(
         uint256 _minDonation,
         uint256 _minimumFundingGoal,
         string[] memory _topNFTURIs,
-        string[] memory _randomNFTURIs
-    ) public {
+        string[] memory _randomNFTURIs,
+        uint256 _distributionDelayInMinutes
+    ) public payable {
+        require(
+            msg.value >= getFee(1, _topNFTURIs.length + _randomNFTURIs.length)
+        );
+
         //Deploy NFT
         mintNFTs(_topNFTURIs, _randomNFTURIs);
 
@@ -41,21 +62,25 @@ contract EndeavourDeployer is ERC721URIStorage, Ownable {
             _minDonation,
             _minimumFundingGoal,
             _randomNFTURIs.length,
-            _topNFTURIs,
+            _topNFTURIs.length,
             msg.sender,
-            owner()
+            owner
         );
         _endeavours.push(endeavour);
+
+        creators.push(msg.sender);
+
+        EndeavourController(controller).addToDistributors(
+            _distributionDelayInMinutes
+        );
     }
 
     //possible fix needed with safeMath
     function setDeployCost(uint256 _deployCost) public onlyOwner {
-        require(_deployCost >= 0, "deploy cost cannot be negative");
         deployCost = _deployCost;
     }
 
     function setNFT(uint256 _NFTCost) public onlyOwner {
-        require(_NFTCost >= 0, "nft cost cannot be negative");
         NFTCost = _NFTCost;
     }
 
@@ -104,6 +129,8 @@ contract EndeavourDeployer is ERC721URIStorage, Ownable {
         address[] memory _randomWinners,
         address[] memory _topWinners
     ) public {
+        require(msg.sender == owner || msg.sender == controller);
+
         for (uint256 i = 0; i < _randomWinners.length; i++) {
             safeTransferFrom(
                 address(this),

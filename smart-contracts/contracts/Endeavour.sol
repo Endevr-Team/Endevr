@@ -12,9 +12,10 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
     //Endeavour Data
     string public ipfsStorage;
     uint256 minDonation;
-    uint256 minimumFundingGoal;
+    uint256 public minimumFundingGoal;
     uint256 randomNFTAmount;
     uint256 biggestNFTAmount;
+    bool public rewardsGiven = false;
 
     //Roles
     bytes32 public constant CREATOR_ROLE = keccak256("CREATOR_ROLE");
@@ -131,7 +132,7 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
             string(
                 abi.encodePacked(
                     "You can refund at most",
-                    Strings.toString(address(this).balance) / (10**18),
+                    Strings.toString(address(this).balance / (10**18)),
                     " ETH"
                 )
             )
@@ -150,6 +151,7 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
             address(this).balance >= minimumFundingGoal,
             "Funding goal has not been reached"
         );
+        require(!rewardsGiven, "rewards have already been given");
 
         //make sure it works and account for failure
         requestId = COORDINATOR.requestRandomWords(
@@ -159,9 +161,17 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
             callbackGasLimit,
             uint32(randomNFTAmount)
         );
+
+        rewardsGiven = true;
     }
 
-    function burn(address[] storage array, uint256 index) internal {
+    function burnAddress(address[] storage array, uint256 index) internal {
+        require(index < array.length);
+        array[index] = array[array.length - 1];
+        array.pop();
+    }
+
+    function burnUInt(uint256[] storage array, uint256 index) internal {
         require(index < array.length);
         array[index] = array[array.length - 1];
         array.pop();
@@ -178,22 +188,28 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
         //find random winner for each nft
         for (uint256 i = 0; i < randomNFTAmount; i++) {
             uint256 latestWinnerIndex = randomWords[i] % nonWinners.length;
-            randomWinners.push([payable(nonWinners[latestWinnerIndex])]);
-            burn(nonWinners, latestWinnerIndex);
+            randomWinners.push(payable(nonWinners[latestWinnerIndex]));
+            burnAddress(nonWinners, latestWinnerIndex);
         }
 
         address[] storage allDonors = donors;
 
         //get winners
         for (uint256 i = 0; i < biggestNFTAmount; i++) {
-            for (uint256 i = 0; i < donors.length; i++) {
-                //get x biggest
-                //entries[donors[i]]
+            uint256 largest = 0;
+            address largestDonor;
+            uint256 largestJ;
+
+            for (uint256 j = 0; j < allDonors.length; j++) {
+                if (entries[allDonors[j]] > largest) {
+                    largest = entries[allDonors[j]];
+                    largestDonor = allDonors[j];
+                    largestJ = j;
+                }
             }
 
-            uint256 latestWinnerIndex = randomWords[i] % nonWinners.length;
-            winners[payable(nonWinners[latestWinnerIndex])] = ipfsNFTs[i];
-            burn(nonWinners, latestWinnerIndex);
+            biggestWinners.push(payable(largestDonor));
+            burnAddress(allDonors, largestJ);
         }
 
         //distribute nft to winners

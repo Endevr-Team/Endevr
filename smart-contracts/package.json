@@ -19,5 +19,8 @@
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.7",
     "hardhat": "^2.9.6"
+  },
+  "dependencies": {
+    "hardhat-contract-sizer": "^2.5.1"
   }
 }

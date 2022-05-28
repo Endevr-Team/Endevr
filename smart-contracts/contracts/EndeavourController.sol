@@ -60,8 +60,17 @@ contract EndeavourController is KeeperCompatibleInterface, AccessControl {
                 (block.timestamp - endeavoursStart[endeavours[i]]) >=
                 endeavoursDelay[endeavours[i]]
             ) {
-                upkeepNeeded = true;
-                break;
+                //rewards not distributed
+                if (!Endeavour(endeavours[i]).rewardsGiven()) {
+                    //rewards should be distributed
+                    if (
+                        endeavours[i].balance >=
+                        Endeavour(endeavours[i]).minimumFundingGoal()
+                    ) {
+                        upkeepNeeded = true;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -76,13 +85,22 @@ contract EndeavourController is KeeperCompatibleInterface, AccessControl {
                 (block.timestamp - endeavoursStart[endeavours[i]]) >=
                 endeavoursDelay[endeavours[i]]
             ) {
-                // perform upkeep
-                Endeavour(endeavours[i]).selectWinner();
+                //rewards not distributed
+                if (!Endeavour(endeavours[i]).rewardsGiven()) {
+                    //rewards should be distributed
+                    if (
+                        endeavours[i].balance >=
+                        Endeavour(endeavours[i]).minimumFundingGoal()
+                    ) {
+                        // perform upkeep
+                        Endeavour(endeavours[i]).selectWinner();
 
-                //remove from tracking
-                endeavoursStart[endeavours[i]] = 0;
-                endeavoursDelay[endeavours[i]] = 0;
-                burn(endeavours, i);
+                        //remove from tracking
+                        endeavoursStart[endeavours[i]] = 0;
+                        endeavoursDelay[endeavours[i]] = 0;
+                        burn(endeavours, i);
+                    }
+                }
             }
         }
     }

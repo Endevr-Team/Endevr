@@ -16,12 +16,20 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const NFTMinter = await hre.ethers.getContractFactory("NFTMinter");
-  const nftMinter = await NFTMinter.deploy("0xd35FB17D2fF9725594C632D00b41F2C4D5B524A6");
+  const EndeavourDeployer = await hre.ethers.getContractFactory("EndeavourDeployer");
+  const endeavourDeployer = await EndeavourDeployer.deploy("0x73C4e14793AD8406B9834796d2Cb6E56a0aDA9C5");
 
-  await nftMinter.deployed();
+  await endeavourDeployer.deployed();
 
-  console.log("NFTMinter deployed to:", nftMinter.address);
+  console.log("EndeavourDeployer deployed to:", endeavourDeployer.address);
+
+  const EndeavourController = await hre.ethers.getContractFactory("EndeavourController");
+  const endeavourController = await EndeavourController.deploy(endeavourDeployer.address);
+
+  await endeavourController.deployed();
+
+  console.log("EndeavourController deployed to:", endeavourController.address);
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere

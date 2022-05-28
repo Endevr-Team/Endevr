@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
+require('hardhat-contract-sizer');
 require("dotenv").config();
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -13,6 +14,12 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   defaultNetwork: "rinkeby",
   solidity: "0.8.7",
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 1000
+    }
+  },
   networks: {
     rinkeby: {
       url: process.env.RINKEBY_URL,

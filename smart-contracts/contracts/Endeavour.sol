@@ -3,12 +3,11 @@ pragma solidity ^0.8.7;
 
 import "./EndeavourDeployer.sol";
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-contract Endeavour is AccessControl, VRFConsumerBaseV2 {
+contract Endeavour is VRFConsumerBaseV2 {
     //Endeavour Data
     string public ipfsStorage;
     uint256 minDonation;
@@ -18,9 +17,9 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
     bool public rewardsGiven = false;
 
     //Roles
-    bytes32 public constant CREATOR_ROLE = keccak256("CREATOR_ROLE");
-    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     address owner;
+    address creator;
+    address controller;
 
     //Raffle / Donation Data
     address[] public donors;
@@ -49,7 +48,8 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
         uint256 _randomNftAmount,
         uint256 _biggestNFTAmount,
         address _endeavourCreator,
-        address _owner
+        address _owner,
+        address _controller
     ) VRFConsumerBaseV2(vrfCoordinator) {
         //Set Data
         minDonation = _minDonation;
@@ -64,38 +64,44 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
         priceFeed = AggregatorV3Interface(ethToUsdRinkeby);
 
         //Setup access roles
-        _setupRole(CREATOR_ROLE, _endeavourCreator);
-        _setupRole(OWNER_ROLE, _owner);
+        // _setupRole(CREATOR_ROLE, _endeavourCreator);
+        // _setupRole(OWNER_ROLE, _owner);
         owner = _owner;
+        creator = _endeavourCreator;
+        controller = _controller;
     }
 
-    function changeSubscriptionId(uint64 _subscriptionId) public {
-        require(
-            hasRole(OWNER_ROLE, msg.sender),
-            "caller is not authorized to change subscription id"
-        );
-        s_subscriptionId = _subscriptionId;
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
     }
+
+    modifier onlyCreator() {
+        require(msg.sender == creator);
+        _;
+    }
+
+    modifier onlyController() {
+        require(msg.sender == controller);
+        _;
+    }
+
+    // function changeSubscriptionId(uint64 _subscriptionId) public {
+    //     // require(
+    //     //     hasRole(OWNER_ROLE, msg.sender),
+    //     //     "caller is not authorized to change subscription id"
+    //     // );
+    //     s_subscriptionId = _subscriptionId;
+    // }
 
     function getMinimumDonationAmount() public view returns (uint256) {
-        int256 latestPrice = getLatestPrice(); //decimal of 8
+        (, int256 latestPrice, , , ) = priceFeed.latestRoundData(); //decimal of 8
         uint256 newPrice = uint256(latestPrice) * 10**10;
         return (minDonation * 10**18) / newPrice;
     }
 
     function donate() public payable {
-        require(
-            msg.value >= getMinimumDonationAmount(),
-            string(
-                abi.encodePacked(
-                    "The minimum donation amount is $",
-                    Strings.toString(minDonation),
-                    " USD, so ",
-                    Strings.toString(getMinimumDonationAmount()),
-                    " ETH"
-                )
-            )
-        );
+        require(msg.value >= getMinimumDonationAmount());
 
         //add to donors if nothing was sent yet
         if (entries[msg.sender] == 0) {
@@ -105,53 +111,23 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
         entries[msg.sender] += msg.value;
     }
 
-    function refundDonors() public {
-        require(
-            hasRole(OWNER_ROLE, msg.sender),
-            "caller is not authorized to refund"
-        );
-
+    function refundDonors() public onlyOwner {
         for (uint256 i = 0; i < donors.length; i++) {
             payable(donors[i]).transfer(entries[donors[i]]);
         }
-
         selfdestruct(payable(msg.sender));
     }
 
-    function releaseFunds(uint256 _amount) public {
-        require(
-            hasRole(CREATOR_ROLE, msg.sender),
-            "caller is not authorized to release funds"
-        );
-        require(
-            address(this).balance >= minimumFundingGoal,
-            "Funding goal has not been reached"
-        );
-        require(
-            _amount <= address(this).balance,
-            string(
-                abi.encodePacked(
-                    "You can refund at most",
-                    Strings.toString(address(this).balance / (10**18)),
-                    " ETH"
-                )
-            )
-        );
+    function releaseFunds(uint256 _amount) public onlyCreator {
+        require(address(this).balance >= minimumFundingGoal);
+        require(_amount <= address(this).balance);
 
         payable(msg.sender).transfer(_amount);
     }
 
-    function selectWinner() public {
-        require(
-            hasRole(OWNER_ROLE, msg.sender) ||
-                hasRole(CREATOR_ROLE, msg.sender),
-            "caller is not authorized to select winner"
-        );
-        require(
-            address(this).balance >= minimumFundingGoal,
-            "Funding goal has not been reached"
-        );
-        require(!rewardsGiven, "rewards have already been given");
+    function selectWinner() public onlyController {
+        require(address(this).balance >= minimumFundingGoal);
+        require(!rewardsGiven);
 
         //make sure it works and account for failure
         requestId = COORDINATOR.requestRandomWords(
@@ -171,27 +147,11 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
         array.pop();
     }
 
-    function burnUInt(uint256[] storage array, uint256 index) internal {
-        require(index < array.length);
-        array[index] = array[array.length - 1];
-        array.pop();
-    }
-
     function fulfillRandomWords(
         uint256, /* requestId */
         uint256[] memory _randomWords
     ) internal override {
         randomWords = _randomWords;
-
-        address[] storage nonWinners = donors;
-
-        //find random winner for each nft
-        for (uint256 i = 0; i < randomNFTAmount; i++) {
-            uint256 latestWinnerIndex = randomWords[i] % nonWinners.length;
-            randomWinners.push(payable(nonWinners[latestWinnerIndex]));
-            burnAddress(nonWinners, latestWinnerIndex);
-        }
-
         address[] storage allDonors = donors;
 
         //get winners
@@ -212,15 +172,17 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
             burnAddress(allDonors, largestJ);
         }
 
+        //find random winner for each nft
+        for (uint256 i = 0; i < randomNFTAmount; i++) {
+            uint256 latestWinnerIndex = randomWords[i] % allDonors.length;
+            randomWinners.push(payable(allDonors[latestWinnerIndex]));
+            burnAddress(allDonors, latestWinnerIndex);
+        }
+
         //distribute nft to winners
         EndeavourDeployer(owner).transferToWinners(
             randomWinners,
             biggestWinners
         );
-    }
-
-    function getLatestPrice() public view returns (int256) {
-        (, int256 price, , , ) = priceFeed.latestRoundData();
-        return price;
     }
 }

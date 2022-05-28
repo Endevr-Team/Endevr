@@ -19,8 +19,8 @@ contract EndeavourDeployer is ERC721URIStorage {
     }
 
     address owner;
-    address[] creators;
     address controller;
+    mapping(address => bool) creators;
 
     Endeavour[] private _endeavours;
 
@@ -58,17 +58,19 @@ contract EndeavourDeployer is ERC721URIStorage {
         mintNFTs(_topNFTURIs, _randomNFTURIs);
 
         //Create Ndver
-        Endeavour endeavour = new Endeavour(
-            _minDonation,
-            _minimumFundingGoal,
-            _randomNFTURIs.length,
-            _topNFTURIs.length,
-            msg.sender,
-            owner
+        _endeavours.push(
+            new Endeavour(
+                _minDonation,
+                _minimumFundingGoal,
+                _randomNFTURIs.length,
+                _topNFTURIs.length,
+                msg.sender,
+                owner,
+                controller
+            )
         );
-        _endeavours.push(endeavour);
 
-        creators.push(msg.sender);
+        creators[msg.sender] = true;
 
         EndeavourController(controller).addToDistributors(
             _distributionDelayInMinutes
@@ -82,10 +84,6 @@ contract EndeavourDeployer is ERC721URIStorage {
 
     function setNFT(uint256 _NFTCost) public onlyOwner {
         NFTCost = _NFTCost;
-    }
-
-    function allEndeavours() public view returns (Endeavour[] memory) {
-        return _endeavours;
     }
 
     function getFee(uint256 _contractsToDeploy, uint256 _nftsToDeploy)
@@ -129,7 +127,12 @@ contract EndeavourDeployer is ERC721URIStorage {
         address[] memory _randomWinners,
         address[] memory _topWinners
     ) public {
-        require(msg.sender == owner || msg.sender == controller);
+        //add check if creator
+        require(
+            msg.sender == owner ||
+                msg.sender == controller ||
+                creators[msg.sender]
+        );
 
         for (uint256 i = 0; i < _randomWinners.length; i++) {
             safeTransferFrom(

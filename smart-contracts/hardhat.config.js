@@ -35,3 +35,7 @@ module.exports = {
 //npx hardhat run scripts/deploy.js --network rinkeby
 
 //npx hardhat verify --network rinkeby 0x045a16Fd97726017118819F3ae70AE2FC3B16C63 "0xd35FB17D2fF9725594C632D00b41F2C4D5B524A6"
+
+// npx hardhat verify --network rinkeby 0xce3C9De726bfD23409e2d25c99d7de57FE9b8c16 "0x73C4e14793AD8406B9834796d2Cb6E56a0aDA9C5"
+
+// npx hardhat verify --network rinkeby 0x2d0481a64fC4f8C3B7A70a419b9858D4606f30AE "0xce3C9De726bfD23409e2d25c99d7de57FE9b8c16"

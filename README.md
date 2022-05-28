@@ -71,4 +71,4 @@ How to work with Chainlink and smart contract framework.
 How Moralis simplifies working with smart contract process. It is a tool that sped up development by a lot.
 
 ## What's next for Endevr
-Expand to more general projects that require funding such as research and others.
+Expand to more general projects that require funding such as research and others. Some aspects of Endvr are still unconnected (frontend and NFT generation). We simply did not have the time for this, but is something we highly aspire to achieve.

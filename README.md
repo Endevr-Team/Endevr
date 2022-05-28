@@ -5,13 +5,13 @@
 
 ## Inspiration
 
-We are inspired by researchers, pioneers, and project creators. We inspired by [a programmer who fought cancer with 50 Nvidia Geforce 1080Ti](https://howardchen.substack.com/p/this-amateur-programmer-fought-cancer?s=r). We are inspired by endeavours. 
+We are inspired by researchers, pioneers, and project creators. We are inspired by [a programmer who fought cancer with 50 Nvidia Geforce 1080Ti](https://howardchen.substack.com/p/this-amateur-programmer-fought-cancer?s=r). We are inspired by endeavours. 
 
 !["coolwulf"](https://user-images.githubusercontent.com/65676392/170809467-d3f3f5ee-def8-43ec-bc28-ed4d36424899.png)
 
-We want to make charity and research projects happen by connecting contributor with pioneers while fostering a transparent and accountable platform to fund these endeavours. We also want people to be incentivized to donate via social proof rewards on the platform such as NFTs.
+We want to make charity and research projects happen by connecting contributors with pioneers while fostering a transparent and accountable platform to fund these endeavors. We also want people to be incentivized to donate via social proof rewards on the platform, such as NFTs.
 
-Currently, charity fundraising is in the dark ages. There’s no incentives for people to donate. No transparency about where contributors’ money is going[.](http://donors.No) And since we don’t see what’s happening with the money, we can’t truly hold the charity accountable for what its doing with it. Endevr seeks to resolve this. 
+Currently, charity fundraising is in the dark ages. There are no incentives for people to donate. No transparency about where contributors’ money is going[.](http://donors.No) And since we don’t see what’s happening with the money, we can’t hold the charity accountable for its doing with it. Endevr seeks to resolve this. 
 
 The key to resolving this is to ensure the people funding the projects have a clear and transparent view of what’s going on with their money. While also giving them an incentive to support these projects. 
 
@@ -21,7 +21,7 @@ We endeavoured to create a space that fosters public good by ensuring open and t
 
 We hope to incentivize public good projects through rewards and community engagement. 
 
-- **The Project Creator** (Pioneer) creates an Endeavour, which contains a mission statement/summary, a description, a fundraising goal, and the creators. The NFT option is available, which allows rewards for top donors and random donors. These NFTs are generate completely randomly by AI. The raffle cost and rewards are also defined.
+- **The Project Creator** (Pioneer) creates an Endeavour, which contains a mission statement/summary, a description, a fundraising goal, and the creators. The NFT option is available, allowing rewards for top donors and random donors. AI generates these NFTs entirely randomly, and the raffle cost and rewards are also defined.
 - **The Project Donor** (Contributor) views the Endeavours, reads the descriptions, and donates. The Contributor receives awards, which may include a Twitter post for donation and money.
 
 <img width="1635" alt="image" src="https://user-images.githubusercontent.com/65676392/170810908-ab876740-b3bb-4714-817a-29c9a27d3bbe.png">
@@ -47,11 +47,12 @@ Chainlink:
 
 Artificial Intelligence:
 
-- Generate NFTs’ using their own logo
-- We have used Neural style transfer which is the state of the art network for generating arts using AI, NST is an optimization technique used to take two images a content image and a style reference image where the style image can be a design or painting or any artwork) and we blend them together so the output image looks like the content image, but “painted” in the style of the style reference image. Here we have used AI to perform this task. We used a VGG network for this task.
+- Generate NFTs' using their logo
+- We have used Neural style transfer, which is the state of the art network for generating arts using AI, NST is an optimization technique used to take two images a content image and a style reference image where the style image can be a design or painting or any artwork) and we blend them, so the output image looks like the content image but "painted" in the style of the style reference image. Here we have used AI to perform this task. We used a VGG network for this task.
 - This works on the values of the intermediate feature maps to indicate the content of a picture.
 The means and correlations among the numerous feature maps, it turns out, may identify an image's style. We calculate a Gram matrix that contains this information by calculating the feature vector's outer product with itself at each place and averaging it across all locations.
-- Some examples are shown below.
+- Some examples are shown below:
+- 
 ![Examples of the nft art generator](https://user-images.githubusercontent.com/65676392/170810723-d791ccd8-f35f-479a-9596-a685407b7bbc.png)
 
 To keep the community engaged, we used NFTs that the Pioneers can generate on their own to give to their donators.

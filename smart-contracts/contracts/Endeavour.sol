@@ -186,6 +186,11 @@ contract Endeavour is AccessControl, VRFConsumerBaseV2 {
 
         //get winners
         for (uint256 i = 0; i < biggestNFTAmount; i++) {
+            for (uint256 i = 0; i < donors.length; i++) {
+                //get x biggest
+                //entries[donors[i]]
+            }
+
             uint256 latestWinnerIndex = randomWords[i] % nonWinners.length;
             winners[payable(nonWinners[latestWinnerIndex])] = ipfsNFTs[i];
             burn(nonWinners, latestWinnerIndex);

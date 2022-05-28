@@ -11,7 +11,7 @@ function NavBar() {
 
     return (
         <div className="flex my-4 mx-10 h-12 justify-between">
-            <Link className="w-[150px]" to="/">
+            <Link style={{ width: "150px" }} to="/">
                 <img className="py-1" src={fullLogo} />
             </Link>
             <div className="">

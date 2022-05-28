@@ -19,6 +19,9 @@ We hope to incentivize public good projects through rewards and community engage
 
 - **The Project Creator** (Pioneer) creates an Endeavour, which contains a mission statement/summary, a description, a fundraising goal, and the creators. The NFT option is available, which allows rewards for top donors and random donors. The ticket cost and rewards are also defined.
 - **The Project Donor** (Contributor) views the Endeavours, reads the descriptions, and donates. The Contributor receives awards, which may include a Twitter post for donation and money.
+<img width="1667" alt="image" src="https://user-images.githubusercontent.com/65676392/170810738-6a004021-4b48-47cf-bf28-9ce112415d44.png">
+<img width="1670" alt="image" src="https://user-images.githubusercontent.com/65676392/170810751-4fc1f9e7-8d09-48ae-b2c3-a4d8f1d77e87.png">
+![image](https://user-images.githubusercontent.com/65676392/170810723-d791ccd8-f35f-479a-9596-a685407b7bbc.png)
 
 ## How we built it
 

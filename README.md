@@ -40,10 +40,9 @@ React:
 
 Chainlink:
 
-- Automate prize distribution
-- Verifiable random winners
-- Minimum USD donation amounts (price feed)
-- Chainlink keepers automate smart contract to distribute fund (automate checking smart contract)
+- Automate prize distribution: Endeavours can set a fixed time to release NFT’s once they reach their funding goal. Chainlink automation with Keepers helped us a lot with that.
+- Verifiable random winners. We were able to choose random winners on chain using the Chainlink VRF V2, which allows us to get many random values, which was perfect to  get many different random winners. Integration was also very easy.
+- Minimum USD donation amounts. We strongly believe that blockchain can be used to improve existing real-world projects. Enabling minimum USD donation amount is a common practice in current donation website and bringing this feature on chain makes Endvr a more approachable blockchain project.
 
 Artificial Intelligence:
 
